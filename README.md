@@ -1,6 +1,6 @@
 A logic-based skincare routine generator that recommends AM & PM routines based on skin type and concern — built with **pure HTML, CSS, and JavaScript** (no frameworks, no AI).
 
-**[Live Demo](#)** ← *(replace with your GitHub Pages link)*
+**[ https://saria-codes.github.io/Skincare-routine-generator-/](#)** ← *(replace with your GitHub Pages link)*
 
 ---
 
