@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skincare Routine Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #ffe4f0 0%, #fdf0ff 50%, #ffe8f5 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: #333;
+    }
+
+    .wrap { max-width: 660px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 2rem; }
+    .emoji-banner { font-size: 40px; margin-bottom: 10px; }
+    .header h1 { font-size: 30px; font-weight: 700; color: #c2185b; margin-bottom: 6px; }
+    .header p { font-size: 14px; color: #888; }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 4px 20px rgba(194,24,91,0.08);
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.2rem; }
+
+    .field label {
+      font-size: 11px; font-weight: 700; color: #c2185b;
+      display: block; margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    select {
+      width: 100%; padding: 10px 14px;
+      border: 2px solid #f8bbd0; border-radius: 10px;
+      font-size: 14px; background: #fff5f8; color: #333;
+      cursor: pointer; outline: none;
+    }
+    select:focus { border-color: #c2185b; }
+
+    .btn-generate {
+      width: 100%; padding: 13px; border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      background: linear-gradient(135deg, #e91e8c, #c2185b);
+      color: white; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(194,24,91,0.35);
+      margin-bottom: 10px;
+    }
+    .btn-generate:hover { opacity: 0.92; }
+    .btn-generate:active { transform: scale(0.98); }
+
+    .btn-reset {
+      width: 100%; padding: 10px;
+      border: 2px solid #f8bbd0; border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      background: transparent; color: #c2185b; cursor: pointer;
+    }
+    .btn-reset:hover { background: #fff0f5; }
+
+    .result-wrap { display: none; }
+
+    .result-card {
+      background: #fff; border-radius: 16px; padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(194,24,91,0.08);
+    }
+
+    .routine-title {
+      font-size: 15px; font-weight: 700; color: #c2185b;
+      margin-bottom: 1rem; text-align: center;
+      padding-bottom: 10px; border-bottom: 2px dashed #f8bbd0;
+    }
+
+    .time-card {
+      border: 1.5px solid #f8bbd0; border-radius: 12px;
+      padding: 1rem; margin-bottom: 12px;
+    }
+
+    .time-label {
+      font-size: 12px; font-weight: 700;
+      padding: 4px 14px; border-radius: 20px;
+      display: inline-block; margin-bottom: 12px;
+    }
+    .am { background: #FFF3CD; color: #856404; }
+    .pm { background: #D1ECF1; color: #0C5460; }
+
+    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+    .step:last-child { margin-bottom: 0; }
+
+    .num {
+      width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, #e91e8c, #c2185b);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: white;
+    }
+
+    .step-info { flex: 1; }
+    .step-type { font-size: 11px; font-weight: 700; color: #c2185b; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+    .step-product { font-size: 14px; font-weight: 700; color: #222; margin-bottom: 3px; }
+    .step-brand { font-size: 12px; color: #e91e8c; font-weight: 600; margin-bottom: 3px; }
+    .step-desc { font-size: 12px; color: #888; line-height: 1.5; }
+
+    .tip-box {
+      background: linear-gradient(135deg, #fff0f5, #fdf0ff);
+      border-left: 4px solid #e91e8c;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px; margin-top: 14px;
+      font-size: 13px; color: #555; line-height: 1.6;
+    }
+    .tip-box strong { color: #c2185b; }
+
+    .copy-btn {
+      margin-top: 14px; width: 100%; padding: 10px;
+      border: 2px solid #f8bbd0; border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      background: transparent; color: #c2185b; cursor: pointer;
+    }
+    .copy-btn:hover { background: #fff0f5; }
+
+    @media (max-width: 480px) {
+      .row { grid-template-columns: 1fr; }
+      .header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="emoji-banner">🌸</div>
+    <h1>Skincare Routine Generator</h1>
+    <p>Personalized AM &amp; PM routines using locally available products</p>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label for="skinType">Skin Type</label>
+        <select id="skinType">
+          <option value="oily">Oily</option>
+          <option value="dry">Dry</option>
+          <option value="combination">Combination</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="concern">Main Concern</label>
+        <select id="concern">
+          <option value="acne">Acne</option>
+          <option value="pih">PIH / Dark Spots</option>
+          <option value="dull">Dullness</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-generate" onclick="generate()">✨ Generate My Routine</button>
+    <button class="btn-reset" onclick="reset()">Reset</button>
+  </div>
+
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-card">
+      <div class="routine-title" id="routineTitle"></div>
+      <div class="time-card">
+        <span class="time-label am">☀️ Morning Routine</span>
+        <div id="amSteps"></div>
+      </div>
+      <div class="time-card">
+        <span class="time-label pm">🌙 Night Routine</span>
+        <div id="pmSteps"></div>
+      </div>
+      <div class="tip-box" id="tipBox"></div>
+      <button class="copy-btn" onclick="copyRoutine()">📋 Copy My Routine</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const data = {
+  oily: {
+    acne: {
+      am: [
+        { type: "Cleanser", product: "Salicylic Acid Foaming Face Wash", brand: "Vince", desc: "Gently removes excess oil and unclogs pores without stripping moisture." },
+        { type: "Serum", product: "Niacinamide 10% + Zinc Serum", brand: "Derma Shine", desc: "Reduces sebum, shrinks the look of pores and calms active breakouts." },
+        { type: "Moisturizer", product: "Oil Control Gel Moisturizer", brand: "Pond's (Pakistan)", desc: "Lightweight gel formula that hydrates without leaving a greasy finish." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "Matte finish sun protection — essential to prevent post-acne dark marks." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Salicylic Acid Foaming Face Wash", brand: "Vince", desc: "Use again at night to deep-clean pores after a full day." },
+        { type: "Toner", product: "BHA Clarifying Toner", brand: "Derma Shine", desc: "Exfoliates inside the pore and removes leftover impurities after cleansing." },
+        { type: "Treatment", product: "Retinol Night Serum 0.1%", brand: "Vince", desc: "Speeds up cell turnover to prevent clogged pores — start 2 nights per week." },
+        { type: "Moisturizer", product: "Hydra Boost Gel Cream", brand: "Neutrogena (available at Naheed/Agha's)", desc: "Seals in the retinol without feeling heavy on oily skin." }
+      ],
+      tip: "Never pop pimples — it causes PIH. Patch test Vince Retinol on your jaw first before applying all over."
+    },
+    pih: {
+      am: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Brightening cleanser with Vitamin C to start fading spots from step one." },
+        { type: "Serum", product: "Vitamin C 20% Brightening Serum", brand: "Derma Shine", desc: "High-strength Vitamin C that visibly fades dark spots and evens skin tone." },
+        { type: "Moisturizer", product: "Niacinamide Brightening Cream", brand: "Vince", desc: "Lightweight cream that reduces pigmentation while controlling oil." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "SPF is the most important PIH step — without it spots take twice as long to fade." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Remove sunscreen and pollution before applying your actives." },
+        { type: "Serum", product: "Alpha Arbutin 2% Serum", brand: "Derma Shine", desc: "Directly blocks melanin production — the gentlest way to fade dark spots." },
+        { type: "Treatment", product: "Azelaic Acid 10% Cream", brand: "Vince", desc: "Fades PIH and reduces redness — safe enough for nightly use on oily skin." },
+        { type: "Moisturizer", product: "Oil Control Gel Moisturizer", brand: "Pond's (Pakistan)", desc: "Locks in actives without adding shine overnight." }
+      ],
+      tip: "Sunscreen is 80% of your PIH treatment. Even a cloudy day in Pakistan has enough UV to deepen dark spots."
+    },
+    dull: {
+      am: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Vitamin C-infused cleanser that gives skin an immediate fresh, glowy look." },
+        { type: "Toner", product: "Glycolic Acid 5% Toning Solution", brand: "Derma Shine", desc: "Gently exfoliates dead skin cells to reveal brighter skin underneath." },
+        { type: "Serum", product: "Vitamin C Brightening Serum", brand: "Hemani Herbals", desc: "Antioxidant serum that protects skin from pollution and UV dullness." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "Protects freshly exfoliated skin — skipping SPF undoes your entire routine." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Removes the day's pollution and oil build-up thoroughly." },
+        { type: "Exfoliant", product: "AHA 30% + BHA 2% Peeling Solution", brand: "Derma Shine", desc: "Use only twice a week — resurfaces dull skin and fades uneven texture." },
+        { type: "Serum", product: "Retinol Night Serum 0.1%", brand: "Vince", desc: "Renews and resurfaces skin overnight for a noticeably glowing morning." },
+        { type: "Moisturizer", product: "Hydra Boost Sleeping Mask", brand: "Neutrogena (Naheed/Agha's)", desc: "Locks in all actives and wakes you up with plumper, dewier skin." }
+      ],
+      tip: "Never use the AHA/BHA peeling solution more than twice a week — overdoing it causes irritation and more dullness."
+    }
+  },
+
+  dry: {
+    acne: {
+      am: [
+        { type: "Cleanser", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "Sulphate-free creamy cleanser that treats without stripping dry skin." },
+        { type: "Serum", product: "Niacinamide 10% + Zinc Serum", brand: "Derma Shine", desc: "Targets acne without drying — safe even on sensitive dry skin types." },
+        { type: "Moisturizer", product: "Intense Moisture Cream with Ceramides", brand: "CeraVe (available at Naheed's)", desc: "Repairs the skin barrier that acne and actives often weaken." },
+        { type: "Sunscreen", product: "Hydrating SPF 50 Sunscreen Cream", brand: "Vince", desc: "Creamy sunscreen that adds a layer of moisture alongside UV protection." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "Gentle evening cleanse that doesn't leave skin feeling tight." },
+        { type: "Treatment", product: "Benzoyl Peroxide 2.5% Gel", brand: "Acnelak (available at pharmacies)", desc: "Kills acne bacteria at a low, gentle strength that won't over-dry skin." },
+        { type: "Serum", product: "Hyaluronic Acid Hydrating Serum", brand: "Derma Shine", desc: "Pulls moisture into skin after actives — apply on damp skin for best results." },
+        { type: "Moisturizer", product: "Night Repair Cream with Shea Butter", brand: "Hemani Herbals", desc: "Rich overnight cream that heals and rebuilds the skin barrier." }
+      ],
+      tip: "Apply your Hyaluronic Acid serum while your face is still slightly damp — it traps water and works much better."
+    },
+    pih: {
+      am: [
+        { type: "Cleanser", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "Creamy, sulphate-free wash — won't disrupt your skin barrier while cleansing." },
+        { type: "Serum", product: "Vitamin C 10% Brightening Serum", brand: "Hemani Herbals", desc: "Gentler 10% Vitamin C perfect for dry skin — fades spots without irritation." },
+        { type: "Moisturizer", product: "Peptide Firming Moisturizer", brand: "Derma Shine", desc: "Plumps, firms and deeply hydrates while supporting fading pigmentation." },
+        { type: "Sunscreen", product: "Hydrating SPF 50 Sunscreen Cream", brand: "Vince", desc: "Creamy formula gives both protection and moisture — critical for PIH." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Rose Water Micellar Cleansing Water", brand: "Hemani Herbals", desc: "First cleanse to gently remove SPF and makeup without rubbing dry skin." },
+        { type: "Cleanser 2", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "Follow up with this cream wash for a thorough but hydrating double cleanse." },
+        { type: "Treatment", product: "Azelaic Acid 10% Cream", brand: "Vince", desc: "Fades PIH gently — one of the safest actives for dry and sensitive skin." },
+        { type: "Moisturizer", product: "Squalane + Ceramide Night Oil", brand: "Derma Shine", desc: "Deeply nourishes and repairs dry skin barrier overnight." }
+      ],
+      tip: "Dry skin + PIH needs extra moisture above everything. A strong barrier means actives work faster and better."
+    },
+    dull: {
+      am: [
+        { type: "Cleanser", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "Adds hydration while cleansing — dry skin often looks dull simply from dehydration." },
+        { type: "Serum", product: "Hyaluronic Acid Hydrating Serum", brand: "Derma Shine", desc: "Plumps skin with water — well-hydrated skin instantly looks more radiant." },
+        { type: "Moisturizer", product: "Vitamin C + E Brightening Day Cream", brand: "Vince", desc: "Brightens and protects simultaneously — perfect one-step for dry skin." },
+        { type: "Sunscreen", product: "Hydrating SPF 50 Sunscreen Cream", brand: "Vince", desc: "UV rays are a leading cause of dullness — protecting skin restores glow over time." }
+      ],
+      pm: [
+        { type: "Cleanser", product: "Moisturizing Cream Face Wash", brand: "Vince", desc: "End the day with a gentle, hydrating cleanse." },
+        { type: "Exfoliant", product: "Lactic Acid 5% Toner", brand: "Derma Shine", desc: "The gentlest exfoliant — perfect for dry skin, use 2 to 3 nights a week." },
+        { type: "Serum", product: "Bakuchiol Plant Retinol Serum", brand: "Hemani Herbals", desc: "Natural retinol alternative — renews skin with zero dryness or irritation." },
+        { type: "Moisturizer", product: "Intense Moisture Cream with Ceramides", brand: "CeraVe (Naheed's)", desc: "Locks in all actives and rebuilds the barrier for a dewy morning glow." }
+      ],
+      tip: "Dry skin looks dull mostly because of dehydration. Drink water, use a humidifier at night, and never skip moisturizer."
+    }
+  },
+
+  combination: {
+    acne: {
+      am: [
+        { type: "Cleanser", product: "Salicylic Acid Foaming Face Wash", brand: "Vince", desc: "Balances the oily T-zone without stripping moisture from dry cheeks." },
+        { type: "Serum", product: "Niacinamide 10% + Zinc Serum", brand: "Derma Shine", desc: "Regulates oil in oily zones while hydrating drier areas — perfect for combination skin." },
+        { type: "Moisturizer", product: "Oil Control Gel Moisturizer", brand: "Pond's (Pakistan)", desc: "Lightweight enough for T-zone, still hydrating enough for cheeks." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "Matte finish works well for combination skin without clogging pores." }
+      ],
+      pm: [
+        { type: "Micellar Water", product: "Rose Water Micellar Cleansing Water", brand: "Hemani Herbals", desc: "First step to remove SPF and makeup without irritating dry zones." },
+        { type: "Cleanser", product: "Salicylic Acid Foaming Face Wash", brand: "Vince", desc: "Second cleanse — focus on T-zone to clear pores after a full day." },
+        { type: "Treatment", product: "BHA Clarifying Toner (T-zone only)", brand: "Derma Shine", desc: "Apply only to nose and forehead — spot exfoliation where skin is oily." },
+        { type: "Moisturizer", product: "Hydra Boost Gel Cream", brand: "Neutrogena (Naheed/Agha's)", desc: "Gel texture suits combination skin — light on T-zone, comfortable on cheeks." }
+      ],
+      tip: "Use two different amounts of moisturizer — a small dab on your T-zone and a generous layer on your cheeks."
+    },
+    pih: {
+      am: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Vitamin C cleanser that starts brightening from your very first step." },
+        { type: "Serum", product: "Vitamin C 20% Brightening Serum", brand: "Derma Shine", desc: "Fades dark spots and evens out skin tone across all zones." },
+        { type: "Moisturizer", product: "Niacinamide Brightening Cream", brand: "Vince", desc: "Controls T-zone oil while actively fading PIH across the face." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "SPF stops UV from making your dark spots permanent — never skip this step." }
+      ],
+      pm: [
+        { type: "Micellar Water", product: "Rose Water Micellar Cleansing Water", brand: "Hemani Herbals", desc: "Gentle first cleanse that suits the drier zones of combination skin." },
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Second cleanse removes everything before your actives go on." },
+        { type: "Serum", product: "Alpha Arbutin 2% Serum", brand: "Derma Shine", desc: "Safe for all zones — gently blocks new melanin without any irritation." },
+        { type: "Moisturizer", product: "Hydra Boost Gel Cream", brand: "Neutrogena (Naheed/Agha's)", desc: "Light gel is ideal for combination skin — not too rich, not too light." }
+      ],
+      tip: "Apply Vitamin C serum to the whole face but dab Azelaic Acid or Alpha Arbutin only directly on dark spots."
+    },
+    dull: {
+      am: [
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Wakes up dull combination skin with a brightening, refreshing cleanse." },
+        { type: "Serum", product: "Hyaluronic Acid Hydrating Serum", brand: "Derma Shine", desc: "Hydrates all zones equally — dehydration is the main cause of dullness." },
+        { type: "Moisturizer", product: "Vitamin C + E Brightening Day Cream", brand: "Vince", desc: "Brightens while keeping combination skin balanced throughout the day." },
+        { type: "Sunscreen", product: "Bright & Matte SPF 50 Sunscreen", brand: "Dr. Essa", desc: "Sun protection every morning is the single biggest step for glowing skin." }
+      ],
+      pm: [
+        { type: "Micellar Water", product: "Rose Water Micellar Cleansing Water", brand: "Hemani Herbals", desc: "Removes makeup, SPF and grime gently as a first cleanse." },
+        { type: "Cleanser", product: "Intense Glow Brightening Face Wash", brand: "Vince", desc: "Follow up for a complete double cleanse before actives." },
+        { type: "Exfoliant", product: "PHA Exfoliating Toner", brand: "Derma Shine", desc: "Gentlest exfoliant — safe for all zones of combination skin, use nightly." },
+        { type: "Moisturizer", product: "Hydra Boost Gel Cream", brand: "Neutrogena (Naheed/Agha's)", desc: "Seals in all actives — combination skin wakes up balanced and glowing." }
+      ],
+      tip: "PHAs are the best exfoliant for combination skin — they exfoliate the oily zones and hydrate the dry zones at the same time."
+    }
+  }
+};
+
+const skinLabels = { oily: "Oily", dry: "Dry", combination: "Combination" };
+const concernLabels = { acne: "Acne", pih: "PIH / Dark Spots", dull: "Dullness" };
+
+function buildSteps(steps, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  steps.forEach(function(s, i) {
+    const div = document.createElement("div");
+    div.className = "step";
+    div.innerHTML =
+      '<div class="num">' + (i + 1) + '</div>' +
+      '<div class="step-info">' +
+        '<div class="step-type">' + s.type + '</div>' +
+        '<div class="step-product">' + s.product + '</div>' +
+        '<div class="step-brand">by ' + s.brand + '</div>' +
+        '<div class="step-desc">' + s.desc + '</div>' +
+      '</div>';
+    container.appendChild(div);
+  });
+}
+
+function generate() {
+  const skin = document.getElementById("skinType").value;
+  const concern = document.getElementById("concern").value;
+  const routine = data[skin][concern];
+  document.getElementById("routineTitle").textContent =
+    skinLabels[skin] + " Skin  ·  " + concernLabels[concern];
+  buildSteps(routine.am, "amSteps");
+  buildSteps(routine.pm, "pmSteps");
+  document.getElementById("tipBox").innerHTML = "<strong>Pro tip:</strong> " + routine.tip;
+  const rw = document.getElementById("resultWrap");
+  rw.style.display = "block";
+  rw.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function reset() {
+  document.getElementById("resultWrap").style.display = "none";
+  document.getElementById("skinType").value = "oily";
+  document.getElementById("concern").value = "acne";
+}
+
+function copyRoutine() {
+  const skin = document.getElementById("skinType").value;
+  const concern = document.getElementById("concern").value;
+  const r = data[skin][concern];
+  let text = "MY SKINCARE ROUTINE — " + skinLabels[skin] + " skin / " + concernLabels[concern] + "\n\nMORNING:\n";
+  r.am.forEach(function(s, i) {
+    text += (i+1) + ". [" + s.type + "] " + s.product + " by " + s.brand + "\n   " + s.desc + "\n";
+  });
+  text += "\nNIGHT:\n";
+  r.pm.forEach(function(s, i) {
+    text += (i+1) + ". [" + s.type + "] " + s.product + " by " + s.brand + "\n   " + s.desc + "\n";
+  });
+  text += "\nPro tip: " + r.tip;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.querySelector(".copy-btn");
+    btn.textContent = "Copied!";
+    setTimeout(function() { btn.textContent = "📋 Copy My Routine"; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
